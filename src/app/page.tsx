@@ -3,9 +3,13 @@ import { Chessboard } from "react-chessboard";
 import { useState } from "react";
 import { Chess } from "Chess.js";
 
+require('dotenv').config();
+const apiKey = process.env.OPENAI_API_KEY;
+
+
 interface GameProps {
   chess: Chess;
-  board: any;
+  board: string;
 }
 
 function MakeAMove({ chess, board }: GameProps){
@@ -42,6 +46,7 @@ export default function App() {
       <div className=" max-w-xl">
         <Game chess={chess} board={board}></Game>
         <button onClick={handleClick}>Move</button>
+        <input id="moveInput" className=" ml-4 text-black" type="text"></input>
       </div>
     </>
   ) 
