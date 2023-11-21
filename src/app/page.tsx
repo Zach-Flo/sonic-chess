@@ -2,16 +2,9 @@
 import { Chessboard } from "react-chessboard";
 import { useState } from "react";
 import { Chess } from "Chess.js";
-import { OpenAI } from "openai";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 
-require('dotenv').config()
-console.log(process.env) // remove this after you've confirmed it is working
 
-const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
-console.log(apiKey);
-const openai = new OpenAI({
-  apiKey: apiKey // This is also the default, can be omitted
-});
 
 
 interface GameProps {
@@ -19,7 +12,36 @@ interface GameProps {
   board: string;
 }
 
+const Dictaphone = () => {
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
+
+  if (!browserSupportsSpeechRecognition) {
+    return <span>Browser doesn't support speech recognition.</span>;
+  }
+
+  return (
+    <div>
+      <p>Microphone: {listening ? 'on' : 'off'}</p>
+      <button onClick={SpeechRecognition.startListening}>Start</button>
+      <button onClick={SpeechRecognition.stopListening}>Stop</button>
+      <button onClick={resetTranscript}>Reset</button>
+      <p>{transcript}</p>
+    </div>
+  );
+};
+
 async function MakeAMove({ chess, board }: GameProps){
+  if(chess.turn() == 'w' && !chess.isGameOver()){
+    let moves = chess.moves();
+    let movesList = moves.join(',');
+    let userMove = (document.getElementById("moveInput") as HTMLInputElement).value
+  }
+
   if (!chess.isGameOver()){
     const moves = chess.moves();
     const move = moves[Math.floor(Math.random() * moves.length)];
@@ -27,12 +49,6 @@ async function MakeAMove({ chess, board }: GameProps){
     setTimeout(() => { console.log("move made");}, 500);
   }
 
-  const completion = await openai.completions.create({
-    model: "text-davinci-002",
-    prompt: "say hello",
-    max_tokens: 5,
-  });
-  console.log(completion.choices[0].text);
 
   return chess.fen()
 
@@ -63,6 +79,8 @@ export default function App() {
         <button onClick={handleClick}>Move</button>
         <input id="moveInput" className=" ml-4 text-black" type="text"></input>
       </div>
+      <Dictaphone></Dictaphone>
+
     </>
   ) 
 
