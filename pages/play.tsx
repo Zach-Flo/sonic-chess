@@ -1,8 +1,10 @@
 'use client'
+import 'regenerator-runtime/runtime'
 import { Chessboard } from "react-chessboard";
 import { useState } from "react";
 import { Chess } from "Chess.js";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
+import { useEffect } from 'react';
 
 
 interface GameProps {
@@ -10,26 +12,36 @@ interface GameProps {
   board: string;
 }
 
-const Dictaphone = () => {
+
+const Dictaphone: React.FC = () => {
   const {
     transcript,
     listening,
     resetTranscript,
-    browserSupportsSpeechRecognition
+    browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
 
-  if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
+  const [speechRecognitionSupported, setSpeechRecognitionSupported] = useState<null | boolean>(null);
+
+  useEffect(() => {
+    // sets to true or false after component has been mounted
+    setSpeechRecognitionSupported(browserSupportsSpeechRecognition);
+}, [browserSupportsSpeechRecognition])
+
+  if (speechRecognitionSupported === null) return null // return null on first render, can be a loading indicator
+
+  if (!speechRecognitionSupported) {
+    return <span>Browser does not support speech recognition.</span>
   }
 
   return (
-    <div>
-      <p>Microphone: {listening ? 'on' : 'off'}</p>
-      <button onClick={() => SpeechRecognition.startListening()}>Start</button>
-      <button onClick={() => SpeechRecognition.stopListening()}>Stop</button>
-      <button onClick={() => resetTranscript()}>Reset</button>
-      <p>{transcript}</p>
-    </div>
+    <>
+        <p>Microphone: {listening ? 'on' : 'off'}</p>
+        <button onClick={() => SpeechRecognition.startListening()}>Start</button>
+        <button onClick={() => SpeechRecognition.stopListening()}>Stop</button>
+        <button onClick={() => resetTranscript()}>Reset</button>
+        <p>{transcript}</p>
+    </>
   );
 };
 
@@ -38,6 +50,7 @@ async function MakeAMove({ chess, board }: GameProps){
     let moves = chess.moves();
     let movesList = moves.join(',');
     let userMove = (document.getElementById("moveInput") as HTMLInputElement).value
+    
   }
 
   if (!chess.isGameOver()){
@@ -78,7 +91,6 @@ const Play: React.FC = () => {
         <input id="moveInput" className=" ml-4 text-black" type="text"></input>
       </div>
       <Dictaphone></Dictaphone>
-
     </>
   ) 
 }
