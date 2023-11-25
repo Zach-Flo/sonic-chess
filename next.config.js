@@ -2,6 +2,7 @@
 
 
 module.exports = {
+
   webpack: (config, { isServer }) => {
     // For the server, you might want to include 'babel-regenerator-runtime'
     if (isServer) {
