@@ -1,12 +1,9 @@
 "use client"
-import Link from 'next/link'
-import Home from "../../pages/home"
-import Play from "../../pages/play"
 import 'regenerator-runtime/runtime'
 import { gsap } from "gsap";
 import { useEffect, useState } from 'react'
 import './components/randomColorDIvs'
-import NoSsr from './components/NoSsr'
+import { useRouter } from 'next/navigation';
 import RandomColorDivs from './components/randomColorDIvs'
 import { get } from 'http'
 
@@ -18,7 +15,51 @@ export default function App() {
   );
 }
 
+
+
 function StartUp() {
+  const [trigger, setTrigger] = useState(false);
+  const navigateToAbout = async () => {
+    await aboutAnimation()
+    setTrigger(trigger => !trigger);
+  }
+
+  const aboutAnimation = () => {
+    return new Promise((resolve) =>{ 
+      let tl = gsap.timeline()
+      tl.to('.about-button', {
+      rotation: 80, // Rotate 360 degrees (clockwise)
+      duration: 1,
+      transformOrigin: 'left center', // Set rotation point to the left side
+      ease: 'bounce.out', // Use your desired easing function})
+      });
+      tl.to('.about-button', { y: "2500%", rotation:180, duration:2, ease:"power1.in"});
+      tl.to(".bar", {height:"20rem", ease:"power1.out", duration: 1.5, onComplete:resolve})
+      tl.to(".bar", {height:"20rem", boxShadow:"none", backgroundColor:"transparent", duration: 3})
+      tl.to(".bar", {height:"0rem",zIndex:0, duration: 1})
+    });
+  };
+
+
+  const router = useRouter();
+  const navigateToPlayPage = async () => {
+    await runExitAnimation()
+    router.push('/play');
+  };
+
+  const runExitAnimation = () => {
+    return new Promise((resolve) => {
+      // Your GSAP animation code here
+      gsap.to(".bar", {
+        duration: 2.5,
+        height: 2000,
+        backgroundColor: 'black',
+        ease: "slow(0.7,0.7,false)",
+        onComplete: resolve, // Resolve the promise when the animation is complete
+      });
+    });
+  };
+
   const colors: string[] = [];
 
     for (let i = 0; i < 100; i++) {
@@ -57,8 +98,7 @@ function StartUp() {
 
       // Update the height dynamically on each repeat for each bar
     bars.forEach((bar) => {
-      let tween = gsap.to(bar, { height: getRandomHeight, duration: 1.5, backgroundColor: colors.pop(), ease:'back.in(4)', repeat:-1, repeatRefresh: true });
-
+      let tween = gsap.to(bar, { height: getRandomHeight, duration: 1.3, backgroundColor: colors.pop(), ease:'back.in(4)', repeat:-1, repeatRefresh: true });
     });
   
     
@@ -83,12 +123,12 @@ function StartUp() {
         </div>
       <nav  className=' nav text-center font-mono'>
         <ul>
-          <button className=' border-white border-solid'>
-            <Link  href="/play">Play</Link>
+          <button onClick={() => navigateToPlayPage()} className=' mb-5'>
+            play
           </button>
           <br></br>
-          <button className=' border-white border-solid h-14'>
-            <Link  href="/home">About</Link>
+          <button onClick={() => navigateToAbout()} className='about-button'>
+            about
           </button>
         </ul>
       </nav>
@@ -103,7 +143,7 @@ function StartUp() {
 
     </div>
     </div>
-    <RandomColorDivs/>
+    <RandomColorDivs trigger={trigger}/>
     </>
   );
 }
