@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import '../src/app/globals.css'
 
+
 const baseUrl = 'https://s4gqn8disb.execute-api.us-east-2.amazonaws.com/beta';
 
 
